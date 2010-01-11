@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/list_background"
+    android:paddingLeft="3px"
+    android:paddingRight="3px"
+>
+    <TextView
+        android:id="@+id/queueRowLabelFilename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#000000"
+        android:text="Test test test test.txt"
+        android:maxLines="1"
+    />
+	
+	<RelativeLayout
+          android:layout_width="fill_parent" 
+          android:layout_height="wrap_content">
+
+		<ImageView
+			android:id="@+id/queueArrow"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:src="@drawable/list_arrow_on"
+        	android:paddingRight="5px"
+		/>
+
+	    <TextView
+	        android:id="@+id/queueRowLabelEta"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="12sp"
+	        android:textColor="#6a6a6a"
+	        android:layout_toRightOf="@+id/queueArrow"
+	        android:text="0:01:17 > 02:33 Wed 12 Aug"
+	    />
+
+	    <TextView
+	        android:id="@+id/queueRowLabelCompleted"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="12sp"
+	        android:textColor="#6a6a6a"
+	        android:layout_below="@+id/labelEta"
+	        android:layout_alignParentRight="true"
+            android:layout_marginRight="6px"
+            android:text="104 / 344mb"
+	    />
+
+	</RelativeLayout>
+</LinearLayout>
