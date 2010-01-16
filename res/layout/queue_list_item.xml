@@ -20,14 +20,6 @@
           android:layout_width="fill_parent" 
           android:layout_height="wrap_content">
 
-		<ImageView
-			android:id="@+id/queueArrow"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:src="@drawable/list_arrow_on"
-        	android:paddingRight="5px"
-		/>
-
 	    <TextView
 	        android:id="@+id/queueRowLabelEta"
 	        android:layout_width="wrap_content"

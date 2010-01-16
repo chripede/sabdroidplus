@@ -1,12 +1,12 @@
-package com.sabdroid.activity;
+package com.googlecode.sabdroidplus.activity;
 
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
-import com.sabdroid.Preferences;
-import com.sabdroid.R;
-import com.sabdroid.SABDroidConstants;
+import com.googlecode.sabdroidplus.Preferences;
+import com.googlecode.sabdroidplus.R;
+import com.googlecode.sabdroidplus.SABDroidConstants;
 
 public class SettingsActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener
 {
@@ -22,6 +22,7 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
 		setSummaryChangeListener(Preferences.SERVER_USERNAME, R.string.setting_auth_username);
 		setSummaryChangeListener(Preferences.SERVER_PASSWORD, R.string.setting_auth_password);
 		setSummaryChangeListener(Preferences.API_KEY, R.string.setting_api_key);
+		setSummaryChangeListener(Preferences.REFRESH_INTERVAL, R.string.setting_refresh_interval);
 	}
 
 	private final void setSummaryChangeListener(String prefKey, final int resId)

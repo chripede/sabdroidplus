@@ -1,4 +1,4 @@
-package com.sabdroid.activity.queue;
+package com.googlecode.sabdroidplus.activity.queue;
 
 import java.util.ArrayList;
 
@@ -9,10 +9,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.sabdroid.R;
-import com.sabdroid.sabnzbd.SABnzbdController;
-import com.sabdroid.util.Calculator;
-import com.sabdroid.util.Formatter;
+import com.googlecode.sabdroidplus.R;
+import com.googlecode.sabdroidplus.sabnzbd.SABnzbdController;
+import com.googlecode.sabdroidplus.util.Calculator;
+import com.googlecode.sabdroidplus.util.Formatter;
 
 public class QueueListRowAdapter extends ArrayAdapter<String>
 {

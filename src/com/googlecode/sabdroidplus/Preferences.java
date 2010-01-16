@@ -1,4 +1,4 @@
-package com.sabdroid;
+package com.googlecode.sabdroidplus;
 
 import android.content.SharedPreferences;
 
@@ -9,6 +9,7 @@ public class Preferences
 	public static final String SERVER_USERNAME = "sabnzb_auth_username";
 	public static final String SERVER_PASSWORD = "sabnzb_auth_password";
 	public static final String API_KEY = "sabnzb_api_key";
+	public static final String REFRESH_INTERVAL = "refresh_interval";
 
 	private static SharedPreferences preferences;
 

@@ -1,4 +1,4 @@
-package com.sabdroid.util;
+package com.googlecode.sabdroidplus.util;
 
 public class Calculator
 {

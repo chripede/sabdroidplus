@@ -1,39 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+	<!--
+		Copyright (C) 2008 The Android Open Source Project Licensed under the
+		Apache License, Version 2.0 (the "License"); you may not use this file
+		except in compliance with the License. You may obtain a copy of the
+		License at http://www.apache.org/licenses/LICENSE-2.0 Unless required
+		by applicable law or agreed to in writing, software distributed under
+		the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+		CONDITIONS OF ANY KIND, either express or implied. See the License for
+		the specific language governing permissions and limitations under the
+		License.
+	-->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
+	<!--
+		This is a primitive example showing the different types of preferences
+		available.
+	-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-          http://www.apache.org/licenses/LICENSE-2.0
+	<PreferenceCategory android:title="Server settings">
 
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
+		<EditTextPreference android:key="server_url"
+			android:title="Server URL" android:summary="@string/setting_server_url"></EditTextPreference>
 
-<!-- This is a primitive example showing the different types of preferences available. -->
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
+		<EditTextPreference android:title="API Key"
+			android:summary="@string/setting_api_key" android:key="sabnzb_api_key"></EditTextPreference>
+			
+		<ListPreference android:key="refresh_interval"
+			android:title="Refresh interval" android:summary="@string/setting_refresh_interval"
+			android:entries="@array/refreshIntervalEntries" android:dialogTitle="Refresh every" android:entryValues="@array/refreshIntervalValues"></ListPreference>
+			
+		<CheckBoxPreference android:key="sabnzb_auth"
+			android:title="Authentication"></CheckBoxPreference>
+			
+		<EditTextPreference android:key="sabnzb_auth_username"
+			android:title="Username" android:dependency="sabnzb_auth"
+			android:summary="@string/setting_auth_username"></EditTextPreference>
+			
+		<EditTextPreference android:dependency="sabnzb_auth"
+			android:key="sabnzb_auth_password" android:title="Password"
+			android:summary="@string/setting_auth_password"></EditTextPreference>
 
-    <PreferenceCategory android:title="Server settings">
 
-        
+	</PreferenceCategory>
 
-    <EditTextPreference android:key="server_url" android:title="Server URL" android:summary="@string/setting_server_url"></EditTextPreference>
 
-<EditTextPreference android:title="Api Key" android:summary="@string/setting_api_key" android:key="sabnzb_api_key"></EditTextPreference><CheckBoxPreference android:key="sabnzb_auth" android:title="Authentication"></CheckBoxPreference>
-<EditTextPreference android:key="sabnzb_auth_username" android:title="Username" android:dependency="sabnzb_auth" android:summary="@string/setting_auth_username"></EditTextPreference>
-<EditTextPreference android:dependency="sabnzb_auth" android:key="sabnzb_auth_password" android:title="Password" android:summary="@string/setting_auth_password"></EditTextPreference>
 
-</PreferenceCategory>
 
-    
 
-    
 
-    
 
 </PreferenceScreen>

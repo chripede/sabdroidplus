@@ -1,4 +1,4 @@
-package com.sabdroid;
+package com.googlecode.sabdroidplus;
 
 import java.util.ArrayList;
 
@@ -19,19 +19,21 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.sabdroid.activity.SettingsActivity;
-import com.sabdroid.activity.queue.QueueListRowAdapter;
-import com.sabdroid.sabnzbd.SABnzbdController;
-import com.sabdroid.util.Calculator;
-import com.sabdroid.util.Formatter;
+import com.googlecode.sabdroidplus.activity.SettingsActivity;
+import com.googlecode.sabdroidplus.activity.queue.QueueListRowAdapter;
+import com.googlecode.sabdroidplus.sabnzbd.SABnzbdController;
+import com.googlecode.sabdroidplus.util.Calculator;
+import com.googlecode.sabdroidplus.util.Formatter;
 
 /**
  * Main SABDroid Activity
  */
-public class SABDroid extends Activity
+public class SABDroidPlus extends Activity
 {
 	private static final int MENU_REFRESH = 1;
 	private static final int MENU_SETTINGS = 2;
@@ -50,7 +52,7 @@ public class SABDroid extends Activity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.queue);
 
 		SharedPreferences preferences = getSharedPreferences(SABDroidConstants.PREFERENCES_KEY, 0);
@@ -82,7 +84,6 @@ public class SABDroid extends Activity
 
 	/**
 	 * Fires up a new Thread to update the queue every X minutes
-	 * TODO add configuration to controll the auto updates
 	 */
 	private void startAutomaticUpdater()
 	{
@@ -90,20 +91,29 @@ public class SABDroid extends Activity
 		{
 			public void run()
 			{
+				int sleepTime = 5000;
+				boolean refreshDisabled = false;
 				for (;;)
 				{
 					try
 					{
-						Thread.sleep(5000);
-					} catch (InterruptedException e)
+						sleepTime = Integer.parseInt(Preferences.get(Preferences.REFRESH_INTERVAL, "5")) * 1000;
+						refreshDisabled = sleepTime == 0;
+						if(!refreshDisabled)
+							Thread.sleep(sleepTime);
+						else
+							Thread.sleep(10000);
+					} 
+					catch (InterruptedException e)
 					{
 						e.printStackTrace();
 					}
-					if (!paused)
+					if (!paused && !refreshDisabled)
 						SABnzbdController.refreshQueue(messageHandler);
 				}
 			}
 		};
+		
 		t.start();
 	}
 
@@ -159,13 +169,29 @@ public class SABDroid extends Activity
 				// Updating the header
 				JSONObject jsonObject = (JSONObject) result[0];
 				backupJsonObject = jsonObject;
+				
+				// Update paused/downloading status
+				ImageView icon = (ImageView) findViewById(R.id.countIcon);
+				boolean paused = msg.getData().getBoolean(SABnzbdController.STATUS_PAUSED, false);
+				if(paused) {
+					icon.setImageResource(R.drawable.icon_pause);
+				} else {
+					icon.setImageResource(R.drawable.icon);
+				}
 
 				updateLabels(jsonObject);
-				updateStatus("");
 				break;
 
 			case SABnzbdController.MESSAGE_STATUS_UPDATE:
 				updateStatus(msg.obj.toString());
+				break;
+				
+			case SABnzbdController.MESSAGE_SHOW_INDERTERMINATE_PROGRESS_BAR:
+				setProgressBarIndeterminateVisibility(true);
+				break;
+
+			case SABnzbdController.MESSAGE_HIDE_INDERTERMINATE_PROGRESS_BAR:
+				setProgressBarIndeterminateVisibility(false);
 				break;
 
 			default:
@@ -184,9 +210,19 @@ public class SABDroid extends Activity
 			String diskspace2 = jsonObject.getString("diskspace2");
 
 			((TextView) findViewById(R.id.freeSpace)).setText(Formatter.formatFull(diskspace2));
-			((TextView) findViewById(R.id.headerLeft)).setText(Formatter.formatShort(mbleft));
-			((TextView) findViewById(R.id.headerDownloaded)).setText(Formatter.formatShort(Double.parseDouble(mb)));
-			((TextView) findViewById(R.id.headerSpeed)).setText(Formatter.formatShort(kbpersec));
+			((TextView) findViewById(R.id.headerLeft)).setText(Formatter.formatFull(mbleft / 1024));
+			((TextView) findViewById(R.id.headerDownloaded)).setText(Formatter.formatFull(Double.parseDouble(mb) / 1024));
+			
+			TextView headerSpeedType = ((TextView)findViewById(R.id.headerSpeedType));
+			TextView headerSpeed = ((TextView) findViewById(R.id.headerSpeed));
+			if(kbpersec < 1024) {
+				headerSpeedType.setText("KB/s");
+				headerSpeed.setText(Formatter.formatShort(kbpersec));
+			} else {
+				headerSpeedType.setText("MB/s");
+				headerSpeed.setText(Formatter.formatFull(kbpersec / 1024));
+			}
+			
 			((TextView) findViewById(R.id.headerEta)).setText(Calculator.calculateETA(mbleft, kbpersec));
 		} catch (Throwable e)
 		{
@@ -241,7 +277,7 @@ public class SABDroid extends Activity
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Add new NZB");
-		alert.setMessage("Enter the NZB url to be downloaded:");
+		alert.setMessage("Enter the NZB url or Newzbin ID to be downloaded:");
 
 		final EditText input = new EditText(this);
 		alert.setView(input);
@@ -251,7 +287,21 @@ public class SABDroid extends Activity
 			public void onClick(DialogInterface dialog, int whichButton)
 			{
 				String value = input.getText().toString();
-				SABnzbdController.addFile(messageHandler, value);
+				
+				int newzbinId = 0;
+				try
+				{
+					newzbinId = Integer.parseInt(value);
+				}
+				catch(NumberFormatException e)
+				{
+				}
+				
+				if(newzbinId != 0) {
+					SABnzbdController.addNewzbinId(messageHandler, newzbinId);
+				} else {				
+					SABnzbdController.addFile(messageHandler, value);
+				}
 			}
 		});
 
@@ -290,10 +340,9 @@ public class SABDroid extends Activity
 			{
 				public void onClick(DialogInterface dialog, int whichButton)
 				{
-					System.out.println("cancel clicked.");
 				}
 			};
-			return new AlertDialog.Builder(SABDroid.this).setTitle("Would you like to configure SABnzb now?").setPositiveButton(
+			return new AlertDialog.Builder(SABDroidPlus.this).setTitle("Setup the connection to SABnzbd+ now?").setPositiveButton(
 			        "OK", okListener).setNegativeButton("Cancel", noListener).create();
 		}
 		return null;
@@ -310,7 +359,7 @@ public class SABDroid extends Activity
 
 	private void updateStatus(String message)
 	{
-		TextView status = (TextView) findViewById(R.id.status);
-		status.setText(message);
+		Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
+		toast.show();
 	}
 }

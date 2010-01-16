@@ -1,4 +1,4 @@
-package com.sabdroid.sabnzbd;
+package com.googlecode.sabdroidplus.sabnzbd;
 
 import java.util.ArrayList;
 
@@ -6,13 +6,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.sabdroid.Preferences;
-import com.sabdroid.util.HttpUtil;
-import com.sabdroid.util.HttpUtil.ServerConnectinoException;
+import com.googlecode.sabdroidplus.Preferences;
+import com.googlecode.sabdroidplus.util.HttpUtil;
+import com.googlecode.sabdroidplus.util.HttpUtil.ServerConnectinoException;
 
 public final class SABnzbdController
 {
@@ -21,6 +22,11 @@ public final class SABnzbdController
 
     public static final int MESSAGE_UPDATE_QUEUE = 1;
     public static final int MESSAGE_STATUS_UPDATE = 2;
+
+	public static final int MESSAGE_SHOW_INDERTERMINATE_PROGRESS_BAR = 3;
+	public static final int MESSAGE_HIDE_INDERTERMINATE_PROGRESS_BAR = 4;
+
+    public static final String STATUS_PAUSED = "paused";
 
     private static boolean executingRefreshQuery = false;
     private static boolean executingCommand = false;
@@ -69,8 +75,6 @@ public final class SABnzbdController
                 finally
                 {
                     executingCommand = false;
-
-                    sendUpdateMessageStatus(messageHandler, "");
                 }
             }
         };
@@ -94,8 +98,13 @@ public final class SABnzbdController
         {
             public void run()
             {
-                try
+            	try
                 {
+                	Message progressMessage = new Message();
+                	progressMessage.setTarget(messageHandler);
+                	progressMessage.what =  MESSAGE_SHOW_INDERTERMINATE_PROGRESS_BAR;
+                	progressMessage.sendToTarget();
+                	
                     Object results[] = new Object[2];
 
                     String queueData = makeApiCall("qstatus");
@@ -112,7 +121,7 @@ public final class SABnzbdController
                         // parseBoolean should take care of that since anything but "true" is considered false
                         paused = Boolean.parseBoolean(jsonObject.getString("paused"));
                     }
-
+                    
                     results[0] = jsonObject;
 
                     JSONArray jobs = jsonObject.getJSONArray("jobs");
@@ -128,13 +137,15 @@ public final class SABnzbdController
 
                     results[1] = rows;
 
+                    Bundle bundle = new Bundle(1);
+                    bundle.putBoolean(STATUS_PAUSED, paused);
+                    
                     Message message = new Message();
                     message.setTarget(messageHandler);
                     message.what = MESSAGE_UPDATE_QUEUE;
                     message.obj = results;
+                    message.setData(bundle);
                     message.sendToTarget();
-                    
-                    sendUpdateMessageStatus(messageHandler, "");
                 }
                 catch (ServerConnectinoException e)
                 {
@@ -143,10 +154,14 @@ public final class SABnzbdController
                 catch (Throwable e)
                 {
                     Log.w("ERROR", e);
-                    sendUpdateMessageStatus(messageHandler, "");
                 }
                 finally
                 {
+                	Message progressMessage = new Message();
+                	progressMessage.setTarget(messageHandler);
+                	progressMessage.what =  MESSAGE_HIDE_INDERTERMINATE_PROGRESS_BAR;
+                	progressMessage.sendToTarget();
+
                     executingRefreshQuery = false;
                 }
             }
@@ -154,7 +169,7 @@ public final class SABnzbdController
 
         executingRefreshQuery = true;
 
-        sendUpdateMessageStatus(messageHandler, "Updating....");
+        //sendUpdateMessageStatus(messageHandler, "Updating....");
 
         thread.start();
     }
@@ -221,6 +236,30 @@ public final class SABnzbdController
     {
         return makeApiCall(command, "");
     }
+    
+    public static void addNewzbinId(final Handler messageHandler, final int value)
+    {
+    	if(executingCommand || !Preferences.isSet(Preferences.SERVER_URL))
+    		return;
+    	
+    	Thread thread = new Thread()
+    	{
+    		public void run()
+    		{
+    			try
+    			{
+    				makeApiCall("addid", "name=" + value);
+    			}
+    			catch(Exception e)
+    			{
+    			}
+    		}
+    	};
+    	
+    	sendUpdateMessageStatus(messageHandler, "Adding Newzbin ID to queue...");
+    	
+    	thread.start();
+    }
 
     public static void addFile(final Handler messageHandler, final String value)
     {
@@ -239,11 +278,6 @@ public final class SABnzbdController
                 }
                 catch (Exception e)
                 {
-
-                }
-                finally
-                {
-                    sendUpdateMessageStatus(messageHandler, "");
                 }
             }
         };

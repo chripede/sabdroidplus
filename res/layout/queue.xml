@@ -30,12 +30,13 @@
                         android:layout_height="wrap_content"
                         android:text="---"
                         android:textColor="#000000"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="KB/s"
-                        android:textColor="#6a6a6a"
-                        android:paddingLeft="4px"/>
+                    <TextView 
+                    	android:id="@+id/headerSpeedType"
+						android:layout_width="wrap_content" 
+						android:layout_height="wrap_content"
+						android:text="KB/s" 
+						android:textColor="#6a6a6a"
+						android:paddingLeft="4px" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -112,15 +113,5 @@
               android:fadingEdge="none"
               android:background="#c6c3c6">
 	</ListView>
-
-    <RelativeLayout
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent">
-        <TextView
-            android:id="@+id/status"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content">
-        </TextView>
-    </RelativeLayout>
 
 </LinearLayout>

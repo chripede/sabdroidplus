@@ -1,4 +1,4 @@
-package com.sabdroid.util;
+package com.googlecode.sabdroidplus.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
