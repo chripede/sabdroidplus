@@ -11,6 +11,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -93,12 +95,28 @@ public class SABDroidPlus extends Activity
 			{
 				int sleepTime = 5000;
 				boolean refreshDisabled = false;
+				WifiManager wifiManager = null;
+				
 				for (;;)
 				{
 					try
 					{
-						sleepTime = Integer.parseInt(Preferences.get(Preferences.REFRESH_INTERVAL, "5")) * 1000;
-						refreshDisabled = sleepTime == 0;
+						refreshDisabled = false;
+						
+						// Check for "Refresh only on wifi connection"
+						if(Preferences.getBoolean(Preferences.REFRESH_ONLY_ON_WIFI, true))
+						{
+							wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+							if(wifiManager.getConnectionInfo().getSupplicantState() != SupplicantState.COMPLETED)
+								refreshDisabled = true;
+						}
+						
+						if(!refreshDisabled)
+						{
+							sleepTime = Integer.parseInt(Preferences.get(Preferences.REFRESH_INTERVAL, "5")) * 1000;
+							refreshDisabled = sleepTime == 0;
+						}
+						
 						if(!refreshDisabled)
 							Thread.sleep(sleepTime);
 						else

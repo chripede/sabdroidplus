@@ -25,9 +25,7 @@
 		<EditTextPreference android:title="API Key"
 			android:summary="@string/setting_api_key" android:key="sabnzb_api_key"></EditTextPreference>
 			
-		<ListPreference android:key="refresh_interval"
-			android:title="Refresh interval" android:summary="@string/setting_refresh_interval"
-			android:entries="@array/refreshIntervalEntries" android:dialogTitle="Refresh every" android:entryValues="@array/refreshIntervalValues"></ListPreference>
+		
 			
 		<CheckBoxPreference android:key="sabnzb_auth"
 			android:title="Authentication"></CheckBoxPreference>
@@ -41,7 +39,8 @@
 			android:summary="@string/setting_auth_password"></EditTextPreference>
 
 
-	</PreferenceCategory>
+	
+</PreferenceCategory>
 
 
 
@@ -49,4 +48,5 @@
 
 
 
+<PreferenceCategory android:title="Connection settings"><ListPreference android:key="refresh_interval" android:title="Refresh interval" android:summary="@string/setting_refresh_interval" android:entries="@array/refreshIntervalEntries" android:dialogTitle="Refresh every" android:entryValues="@array/refreshIntervalValues"></ListPreference><CheckBoxPreference android:key="refresh_wifi_only" android:summary="Only refresh queue on wifi connection" android:title="Wifi refresh only"></CheckBoxPreference></PreferenceCategory>
 </PreferenceScreen>

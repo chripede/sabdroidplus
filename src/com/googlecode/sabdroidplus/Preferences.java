@@ -10,6 +10,7 @@ public class Preferences
 	public static final String SERVER_PASSWORD = "sabnzb_auth_password";
 	public static final String API_KEY = "sabnzb_api_key";
 	public static final String REFRESH_INTERVAL = "refresh_interval";
+	public static final String REFRESH_ONLY_ON_WIFI = "refresh_wifi_only";
 
 	private static SharedPreferences preferences;
 
@@ -26,6 +27,11 @@ public class Preferences
 	public static String get(String key, String defaultValue)
 	{
 		return preferences.getString(key, defaultValue);
+	}
+	
+	public static boolean getBoolean(String key, boolean defaultValue)
+	{
+		return preferences.getBoolean(key, defaultValue);
 	}
 
 	public static boolean isSet(String key)
