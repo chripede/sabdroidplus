@@ -104,13 +104,14 @@ public class SABDroidPlus extends Activity
 						refreshDisabled = false;
 						
 						// Check for "Refresh only on wifi connection"
-						if(Preferences.getBoolean(Preferences.REFRESH_ONLY_ON_WIFI, true))
+						if(Preferences.getBoolean(Preferences.REFRESH_ONLY_ON_WIFI, false))
 						{
 							wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 							if(wifiManager.getConnectionInfo().getSupplicantState() != SupplicantState.COMPLETED)
 								refreshDisabled = true;
 						}
 						
+						// Set sleeptime based on the refresh interval selected
 						if(!refreshDisabled)
 						{
 							sleepTime = Integer.parseInt(Preferences.get(Preferences.REFRESH_INTERVAL, "5")) * 1000;

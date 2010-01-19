@@ -79,7 +79,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="MB"
+                        android:text="GB"
                         android:textColor="#6a6a6a"
                         android:paddingLeft="4px"/>
                 </LinearLayout>

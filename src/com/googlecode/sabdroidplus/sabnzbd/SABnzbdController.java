@@ -25,6 +25,10 @@ public final class SABnzbdController
 
 	public static final int MESSAGE_SHOW_INDERTERMINATE_PROGRESS_BAR = 3;
 	public static final int MESSAGE_HIDE_INDERTERMINATE_PROGRESS_BAR = 4;
+	
+	public final static int MESSAGE_LOAD_CATEGORIES = 5;
+	public final static int MESSAGE_ADD_NZB = 6;
+
 
     public static final String STATUS_PAUSED = "paused";
 
@@ -260,6 +264,32 @@ public final class SABnzbdController
     	
     	thread.start();
     }
+    
+    public static void addFile(final Handler messageHandler, final String nzbUrl, final String category)
+    {
+        // Already running or settings not ready
+        if (executingCommand || !Preferences.isSet(Preferences.SERVER_URL))
+            return;
+
+        Thread thread = new Thread()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    makeApiCall("addurl", "cat=" + category + "&name=" + nzbUrl);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        };
+
+        sendUpdateMessageStatus(messageHandler, "Adding new download to queue...");
+
+        thread.start();
+    }
 
     public static void addFile(final Handler messageHandler, final String value)
     {
@@ -285,5 +315,41 @@ public final class SABnzbdController
         sendUpdateMessageStatus(messageHandler, "Adding new download to queue...");
 
         thread.start();
+    }
+    
+    public static void getCategories(final Handler messageHandler)
+    {
+    	Thread thread = new Thread()
+    	{
+    		@Override
+    		public void run()
+    		{
+    			String[] categories = null;
+    	    	try 
+    	    	{
+    				String jsonCategories = makeApiCall("get_cats");
+    	            JSONObject jsonObject = new JSONObject(jsonCategories);
+    	            JSONArray categoriesArray = jsonObject.getJSONArray("categories");
+    	            
+    	        	categories = new String[categoriesArray.length()];
+    	            for (int i = 0; i < categoriesArray.length(); i++)
+    	            {
+    	                categories[i] = categoriesArray.getString(i);
+    	            }
+    	    	} 
+    	    	catch (Exception e) 
+    	    	{
+    	    		categories = new String[] { "None" };
+    			}
+    	    	
+    	    	Message msg = new Message();
+    	    	msg.setTarget(messageHandler);
+    	    	msg.what = MESSAGE_LOAD_CATEGORIES;
+    	    	msg.obj = categories;
+    	    	msg.sendToTarget();
+    		}
+    	};
+    	
+    	thread.start();
     }
 }

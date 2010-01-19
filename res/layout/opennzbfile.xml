@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content" 
+  android:orientation="vertical"
+  android:paddingLeft="5px"
+  android:paddingRight="5px"
+  >
+	
+	<TextView android:layout_height="wrap_content" android:singleLine="true" android:layout_width="fill_parent" android:id="@+id/openNzbFileUrlHeader" android:text="@string/url_of_nzb_to_add"></TextView>
+	
+	<EditText android:id="@+id/openNzbFileUrl" android:layout_width="fill_parent" android:layout_height="wrap_content"></EditText>
+	
+	<TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/openNzbFileCategoryHeader" android:text="@string/add_nzb_category" android:paddingTop="10px"></TextView>
+
+	<Spinner android:id="@+id/openNzbFileCategory" android:layout_height="wrap_content" android:layout_width="fill_parent"></Spinner>
+	
+	<TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:stretchColumns="0,1" android:paddingTop="20px">
+		<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<Button android:id="@+id/openNzbFileOk" android:text="Queue" android:layout_width="fill_parent"></Button>
+			<Button android:id="@+id/openNzbFileCancel" android:text="Cancel" android:layout_width="fill_parent"></Button>
+		</TableRow>
+	</TableLayout>
+
+</LinearLayout>
