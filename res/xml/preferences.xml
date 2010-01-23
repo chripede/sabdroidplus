@@ -43,10 +43,8 @@
 </PreferenceCategory>
 
 
-
-
-
-
-
 <PreferenceCategory android:title="Connection settings"><ListPreference android:key="refresh_interval" android:title="Refresh interval" android:summary="@string/setting_refresh_interval" android:entries="@array/refreshIntervalEntries" android:dialogTitle="Refresh every" android:entryValues="@array/refreshIntervalValues"></ListPreference><CheckBoxPreference android:key="refresh_wifi_only" android:summary="Only refresh queue on wifi connection" android:title="Wifi refresh only"></CheckBoxPreference></PreferenceCategory>
+<PreferenceCategory android:title="Newzbin settings"><EditTextPreference android:key="newzbin_username" android:summary="Newzbin username" android:title="Username"></EditTextPreference>
+<EditTextPreference android:key="newzbin_password" android:summary="Newzbin password" android:title="Password" android:password="true"></EditTextPreference>
+</PreferenceCategory>
 </PreferenceScreen>

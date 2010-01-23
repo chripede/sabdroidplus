@@ -37,9 +37,9 @@ public class HttpUtil
     /**
      * Gets data from URL
      * throws {@link RuntimeException} If anything goes wrong
-     * @throws ServerConnectinoException 
+     * @throws ServerConnectionException 
      */
-    public String getData(String url) throws ServerConnectinoException
+    public String getData(String url) throws ServerConnectionException
     {
         try
         {
@@ -51,7 +51,7 @@ public class HttpUtil
 
             if (status != HttpStatus.SC_OK)
             {
-                throw new ServerConnectinoException("Connection Error: " + response.getStatusLine().getReasonPhrase());
+                throw new ServerConnectionException("Connection Error: " + response.getStatusLine().getReasonPhrase());
             }
             else
             {
@@ -60,13 +60,13 @@ public class HttpUtil
                 return inputStreamAsString(content);
             }
         }
-        catch (ServerConnectinoException e)
+        catch (ServerConnectionException e)
         {
-            throw new ServerConnectinoException(e.getMessage());
+            throw new ServerConnectionException(e.getMessage());
         }
         catch (IOException e)
         {
-            throw new ServerConnectinoException("Connection timeout!");
+            throw new ServerConnectionException("Connection timeout!");
         }
         catch (Throwable e)
         {
@@ -92,11 +92,11 @@ public class HttpUtil
         return result.substring(0, result.length() - 1);
     }
 
-    public class ServerConnectinoException extends Exception
+    public class ServerConnectionException extends Exception
     {
         private static final long serialVersionUID = -7812290125811215338L;
 
-        public ServerConnectinoException(String message)
+        public ServerConnectionException(String message)
         {
             super(message);
         }

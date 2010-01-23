@@ -13,7 +13,7 @@ import android.util.Log;
 
 import com.googlecode.sabdroidplus.Preferences;
 import com.googlecode.sabdroidplus.util.HttpUtil;
-import com.googlecode.sabdroidplus.util.HttpUtil.ServerConnectinoException;
+import com.googlecode.sabdroidplus.util.HttpUtil.ServerConnectionException;
 
 public final class SABnzbdController
 {
@@ -29,6 +29,9 @@ public final class SABnzbdController
 	public final static int MESSAGE_LOAD_CATEGORIES = 5;
 	public final static int MESSAGE_ADD_NZB = 6;
 
+	public static final int MESSAGE_REMOVE_ITEM = 7;
+	public static final int MESSAGE_MOVED_ITEM = 8;
+	public static final int MESSAGE_RENAMED_ITEM = 9;
 
     public static final String STATUS_PAUSED = "paused";
 
@@ -135,6 +138,7 @@ public final class SABnzbdController
                         String rowValues = jobs.getJSONObject(i).get("filename").toString();
                         rowValues = rowValues + "#" + jobs.getJSONObject(i).getDouble("mb");
                         rowValues = rowValues + "#" + jobs.getJSONObject(i).getDouble("mbleft");
+                        rowValues = rowValues + "#" + jobs.getJSONObject(i).getString("id");
 
                         rows.add(rowValues);
                     }
@@ -151,7 +155,7 @@ public final class SABnzbdController
                     message.setData(bundle);
                     message.sendToTarget();
                 }
-                catch (ServerConnectinoException e)
+                catch (ServerConnectionException e)
                 {
                     sendUpdateMessageStatus(messageHandler, e.getMessage());
                 }
@@ -190,7 +194,7 @@ public final class SABnzbdController
         message.sendToTarget();
     }
 
-    public static String makeApiCall(String command, String xTraParams) throws ServerConnectinoException
+    public static String makeApiCall(String command, String xTraParams) throws ServerConnectionException
     {
         String url = URL_TEMPLATE;
         url = url.replace("[SERVER_URL]", fixUrlFromPreferences(Preferences.get(Preferences.SERVER_URL)));
@@ -236,14 +240,14 @@ public final class SABnzbdController
         return "";
     }
 
-    public static String makeApiCall(String command) throws ServerConnectinoException
+    public static String makeApiCall(String command) throws ServerConnectionException
     {
         return makeApiCall(command, "");
     }
     
     public static void addNewzbinId(final Handler messageHandler, final int value)
     {
-    	if(executingCommand || !Preferences.isSet(Preferences.SERVER_URL))
+    	if(!Preferences.isSet(Preferences.SERVER_URL))
     		return;
     	
     	Thread thread = new Thread()
@@ -267,8 +271,7 @@ public final class SABnzbdController
     
     public static void addFile(final Handler messageHandler, final String nzbUrl, final String category)
     {
-        // Already running or settings not ready
-        if (executingCommand || !Preferences.isSet(Preferences.SERVER_URL))
+        if (!Preferences.isSet(Preferences.SERVER_URL))
             return;
 
         Thread thread = new Thread()
@@ -347,6 +350,74 @@ public final class SABnzbdController
     	    	msg.what = MESSAGE_LOAD_CATEGORIES;
     	    	msg.obj = categories;
     	    	msg.sendToTarget();
+    		}
+    	};
+    	
+    	thread.start();
+    }
+    
+    public static void removeItem(final Handler messageHandler, final String nzoId)
+    {
+    	Thread thread = new Thread()
+    	{
+			@Override
+			public void run() {
+				try {
+					makeApiCall("queue", "name=delete&value=" + nzoId);
+				} catch (ServerConnectionException e) {
+					e.printStackTrace();
+				}
+				
+				Message msg = new Message();
+				msg.setTarget(messageHandler);
+				msg.what = MESSAGE_REMOVE_ITEM;
+				msg.sendToTarget();
+			}
+    	};
+    	
+    	thread.start();
+    }
+    
+    public static void moveItem(final Handler messageHandler, final String nzoId, final int position)
+    {
+    	Thread thread = new Thread()
+    	{
+    		@Override
+    		public void run()
+    		{
+    			try {
+    				makeApiCall("switch", "value=" + nzoId + "&value2=" + position);
+    			} catch (ServerConnectionException e) {
+    				e.printStackTrace();
+    			}
+    			
+    			Message msg = new Message();
+    			msg.setTarget(messageHandler);
+    			msg.what = MESSAGE_MOVED_ITEM;
+    			msg.sendToTarget();
+    		}
+    	};
+    	
+    	thread.start();
+    }
+    
+    public static void renameItem(final Handler messageHandler, final String nzoId, final String newName)
+    {
+    	Thread thread = new Thread()
+    	{
+    		@Override
+    		public void run()
+    		{
+    			try {
+    				makeApiCall("queue", "name=rename&value=" + nzoId + "&value2=" + newName);
+    			} catch (ServerConnectionException e) {
+					e.printStackTrace();
+				}
+    			
+    			Message msg = new Message();
+    			msg.setTarget(messageHandler);
+    			msg.what = MESSAGE_RENAMED_ITEM;
+    			msg.sendToTarget();
     		}
     	};
     	

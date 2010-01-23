@@ -16,15 +16,19 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.googlecode.sabdroidplus.activity.SettingsActivity;
 import com.googlecode.sabdroidplus.activity.queue.QueueListRowAdapter;
@@ -42,11 +46,17 @@ public class SABDroidPlus extends Activity
 	private static final int MENU_QUIT = 3;
 	private static final int MENU_PLAY_PAUSE = 4;
 	private static final int MENU_ADD_NZB = 5;
+	
+	private static final int CONTEXT_RENAME = 1;
+	private static final int CONTEXT_DELETE = 2;
+	private static final int CONTEXT_MOVEUP = 3;
+	private static final int CONTEXT_MOVEDOWN = 4;
 
 	final static int DIALOG_SETUP_PROMPT = 999;
 
 	private static ArrayList<String> rows = new ArrayList<String>();
 	private static JSONObject backupJsonObject;
+	private ListView listView = null;
 	protected boolean paused;
 
 	@SuppressWarnings("unchecked")
@@ -60,8 +70,9 @@ public class SABDroidPlus extends Activity
 		SharedPreferences preferences = getSharedPreferences(SABDroidConstants.PREFERENCES_KEY, 0);
 		Preferences.update(preferences);
 		
-		ListView listView = (ListView) findViewById(R.id.queueList);
+		listView = (ListView) findViewById(R.id.queueList);
 		listView.setAdapter(new QueueListRowAdapter(this, rows));
+		registerForContextMenu(listView);
 
 		// Tries to fetch recoverable data
 		Object data[] = (Object[]) getLastNonConfigurationInstance();
@@ -211,6 +222,12 @@ public class SABDroidPlus extends Activity
 
 			case SABnzbdController.MESSAGE_HIDE_INDERTERMINATE_PROGRESS_BAR:
 				setProgressBarIndeterminateVisibility(false);
+				break;
+				
+			case SABnzbdController.MESSAGE_REMOVE_ITEM:
+			case SABnzbdController.MESSAGE_MOVED_ITEM:
+			case SABnzbdController.MESSAGE_RENAMED_ITEM:
+				SABnzbdController.refreshQueue(messageHandler);
 				break;
 
 			default:
@@ -374,6 +391,64 @@ public class SABDroidPlus extends Activity
 		data[0] = rows;
 		data[1] = backupJsonObject;
 		return data;
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		
+		menu.setHeaderTitle("Manage queue item");
+		menu.add(0, CONTEXT_RENAME, 0, "Rename");
+		menu.add(0, CONTEXT_DELETE, 0, "Delete");
+		menu.add(0, CONTEXT_MOVEUP, 0, "Move up");
+		menu.add(0, CONTEXT_MOVEDOWN, 0, "Move down");
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+
+		View selectedItem = listView.getAdapter().getView(info.position, null, null);
+		final String nzoId = ((TextView)selectedItem.findViewById(R.id.queueRowNzoId)).getText().toString();
+		
+		switch(item.getItemId())
+		{
+		case CONTEXT_DELETE:
+			SABnzbdController.removeItem(messageHandler, nzoId);
+			break;
+		case CONTEXT_RENAME:
+			AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+			alertDialog.setTitle("Rename");
+			alertDialog.setMessage("Enter new name");
+			final EditText textInput = new EditText(this);
+			String currentName = ((TextView)selectedItem.findViewById(R.id.queueRowLabelFilename)).getText().toString();
+			textInput.setText(currentName);
+			alertDialog.setView(textInput);
+			alertDialog.setPositiveButton("Ok", new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					String newName = textInput.getText().toString();
+					SABnzbdController.renameItem(messageHandler, nzoId, newName);
+				}
+			});
+			alertDialog.setNegativeButton("Cancel", new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Do nothing
+				}
+			});
+			alertDialog.show();
+			break;
+		case CONTEXT_MOVEUP:
+			int position = info.position == 0 ? 0 : info.position - 1;
+			SABnzbdController.moveItem(messageHandler, nzoId, position);
+			break;
+		case CONTEXT_MOVEDOWN:
+			int downPosition = info.position == (listView.getCount()-1) ? (listView.getCount()-1): info.position + 1;
+			SABnzbdController.moveItem(messageHandler, nzoId, downPosition);
+			break;
+		}
+		return true;
 	}
 
 	private void updateStatus(String message)

@@ -43,4 +43,7 @@
 	    />
 
 	</RelativeLayout>
+	
+	<TextView android:id="@+id/queueRowNzoId" android:visibility="invisible" android:layout_width="0px" android:layout_height="0px" />
+	
 </LinearLayout>

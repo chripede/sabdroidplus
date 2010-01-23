@@ -43,6 +43,8 @@ public class QueueListRowAdapter extends ArrayAdapter<String>
 		String completed = Formatter.formatShort(values[2]) + " / " + Formatter.formatShort(values[1]) + " MB";
 		
 		((TextView) row.findViewById(R.id.queueRowLabelCompleted)).setText(completed);
+		
+		((TextView) row.findViewById(R.id.queueRowNzoId)).setText(values[3]);
 
 		return (row);
 	}
