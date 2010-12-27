@@ -425,14 +425,12 @@ public class SABDroidPlus extends Activity
 			textInput.setText(currentName);
 			alertDialog.setView(textInput);
 			alertDialog.setPositiveButton("Ok", new OnClickListener() {
-				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String newName = textInput.getText().toString();
 					SABnzbdController.renameItem(messageHandler, nzoId, newName);
 				}
 			});
 			alertDialog.setNegativeButton("Cancel", new OnClickListener() {
-				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					// Do nothing
 				}

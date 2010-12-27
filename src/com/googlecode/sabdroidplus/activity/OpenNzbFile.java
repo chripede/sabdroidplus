@@ -1,5 +1,8 @@
 package com.googlecode.sabdroidplus.activity;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.net.Uri;
@@ -71,23 +74,21 @@ public class OpenNzbFile extends Activity {
 		}
 		
 		((Button) findViewById(R.id.openNzbFileOk)).setOnClickListener(new OnClickListener() {
-			@Override
 			public void onClick(View v) {
-				SABnzbdController.addFile(messageHandler, nzbUrl.getText().toString(), categorySpinner.getSelectedItem().toString());
+				try {
+					SABnzbdController.addFile(messageHandler, URLEncoder.encode(nzbUrl.getText().toString(), "utf-8"), categorySpinner.getSelectedItem().toString());
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 				finish();
 			}
 		});
 		
 		((Button) findViewById(R.id.openNzbFileCancel)).setOnClickListener(new OnClickListener() {
-			
-			@Override
 			public void onClick(View v) {
 				finish();
 			}
 		});
-		
-		
-		
 		
 		progressDialog = ProgressDialog.show(this, "Loading categories", "Please wait while categories are being fetched", true);
 		SABnzbdController.getCategories(messageHandler);
